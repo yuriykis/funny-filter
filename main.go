@@ -2,11 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
+
+	"github.com/yuriykis/funny-filter/cmd"
 )
 
 func main() {
-	unsetPacketsLimit()
+	if err := cmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func setBandwidthLimit() {

@@ -22,9 +22,9 @@
 # sudo ip link delete ifb0 type ifb
 
 # limit packets per second
-# sudo iptables -A INPUT -p tcp -s 80.249.99.148 -m hashlimit --hashlimit 10/sec --hashlimit-mode srcip --hashlimit-name limit -j ACCEPT
-# sudo iptables -A INPUT -p tcp -s 80.249.99.148 -j DROP
+# sudo iptables -A INPUT -i enp0s5 -p tcp -s 80.249.99.148 -m hashlimit --hashlimit 10/sec --hashlimit-mode srcip --hashlimit-name limit -j ACCEPT
+# sudo iptables -A INPUT -i enp0s5 -p tcp -s 80.249.99.148 -j DROP
 
 # remove the limit
-# sudo iptables -D INPUT -p tcp -s 80.249.99.148 -m hashlimit --hashlimit 10/sec --hashlimit-mode srcip --hashlimit-name limit -j ACCEPT
-# sudo iptables -D INPUT -p tcp -s 80.249.99.148 -j DROP
+# sudo iptables -D INPUT -i enp0s5 -p tcp -s 80.249.99.148 -m hashlimit --hashlimit 10/sec --hashlimit-mode srcip --hashlimit-name limit -j ACCEPT
+# sudo iptables -D INPUT -i enp0s5 -p tcp -s 80.249.99.148 -j DROP

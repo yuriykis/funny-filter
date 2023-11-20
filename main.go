@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/yuriykis/funny-filter/cmd"
+	"github.com/yuriykis/funny-filter/log"
 )
 
 func main() {

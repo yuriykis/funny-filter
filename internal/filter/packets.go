@@ -1,6 +1,11 @@
 package filter
 
-import "fmt"
+import (
+	"fmt"
+	"net"
+
+	"github.com/yuriykis/funny-filter/log"
+)
 
 type PacketsLimit struct {
 	IP    string
@@ -18,6 +23,12 @@ func NewPacketsLimit(ip string, limit string) (*PacketsLimit, error) {
 }
 
 func (p *PacketsLimit) Apply() error {
+
+	log.WithFields(log.Fields{
+		"ip":    p.IP,
+		"limit": p.Limit,
+	}).Info("Applying packets limit")
+
 	if err := setPacketsLimit(p.IP, p.Limit); err != nil {
 		return err
 	}
@@ -28,6 +39,12 @@ func (p *PacketsLimit) Apply() error {
 }
 
 func (p *PacketsLimit) Unset() error {
+
+	log.WithFields(log.Fields{
+		"ip":    p.IP,
+		"limit": p.Limit,
+	}).Info("Unsetting packets limit")
+
 	if err := unsetPacketsLimit(p.IP, p.Limit); err != nil {
 		return err
 	}
@@ -38,11 +55,35 @@ func (p *PacketsLimit) Unset() error {
 }
 
 func validatePacketsParams(ip string, limit string) error {
+	if err := validatePacketsLimit(limit); err != nil {
+		return err
+	}
+	if err := validateIP(ip); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validatePacketsLimit(limit string) error {
+	if limit == "" {
+		return fmt.Errorf("Limit is empty")
+	}
+	if s := limit; s != "" {
+		for _, r := range s {
+			if r < '0' || r > '9' {
+				return fmt.Errorf("Limit should contain only digits")
+			}
+		}
+	}
+	return nil
+}
+
+func validateIP(ip string) error {
 	if ip == "" {
 		return fmt.Errorf("IP is empty")
 	}
-	if limit == "" {
-		return fmt.Errorf("Limit is empty")
+	if net.ParseIP(ip) == nil {
+		return fmt.Errorf("IP is invalid")
 	}
 	return nil
 }

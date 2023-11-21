@@ -18,6 +18,10 @@
   </p>
 </div>
 
+## Important Note
+Be careful when using this tool. It is still in development and may not work as expected. You may experience network connectivity issues after using this tool, so select the network interface carefully.
+At the moment, the tool is only tested on Fedora 38. It may not work on other Linux distributions.
+
 ## Features
 * Bandwidth Limiting: Set and unset bandwidth limits for specific IP addresses.
 * Packets Limiting: Set and unset packet rate limits for specific IP addresses.
@@ -99,6 +103,12 @@ ff packets unset --ip 80.249.99.148 --limit 10
 ### To run the automated tests for the app, use:
 ```sh
 make test
+```
+
+## Logging
+### The application logs are stored in the following location:
+```sh
+/tmp/ff.log
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"runtime"
+
 	"github.com/spf13/cobra"
 	"github.com/yuriykis/funny-filter/internal/filter"
 )
@@ -42,26 +44,26 @@ func NewUnsetBandwidthCmd() *cobra.Command {
 }
 
 func parseSetBandwidthCmd(cmd *cobra.Command, args []string) error {
-	ps, err := validate(cmd)
+	ps, err := validateBandwidthParams(cmd)
 	if err != nil {
 		return err
 	}
-	b, err := filter.NewBandwidthLimit(ps.dev, ps.ip, ps.limit)
+	b, err := filter.NewBandwidthLimit(runtime.GOOS, ps.dev, ps.ip, ps.limit)
 	if err != nil {
 		return err
 	}
-	if err := b.Apply(); err != nil {
+	if err := b.Set(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func parseUnsetBandwidthCmd(cmd *cobra.Command, args []string) error {
-	ps, err := validate(cmd)
+	ps, err := validateBandwidthParams(cmd)
 	if err != nil {
 		return err
 	}
-	b, err := filter.NewBandwidthLimit(ps.dev, ps.ip, ps.limit)
+	b, err := filter.NewBandwidthLimit(runtime.GOOS, ps.dev, ps.ip, ps.limit)
 	if err != nil {
 		return err
 	}

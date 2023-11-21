@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// TODO: add cli config file to provide the ability to change log level and log file path
 const (
 	logFile = "/tmp/ff.log"
 )
@@ -40,6 +41,9 @@ func Infof(format string, args ...any) {
 
 func Warnf(format string, args ...any) {
 	logger.Warnf(format, args...)
+}
+func Debugf(format string, args ...any) {
+	logger.Debugf(format, args...)
 }
 
 func Errorf(format string, args ...any) {

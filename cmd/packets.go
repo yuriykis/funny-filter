@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"runtime"
+
 	"github.com/spf13/cobra"
 	"github.com/yuriykis/funny-filter/internal/filter"
 )
@@ -42,26 +44,26 @@ func NewUnsetPacketsCmd() *cobra.Command {
 }
 
 func parseSetPacketsCmd(cmd *cobra.Command, args []string) error {
-	ps, err := validate(cmd)
+	ps, err := validatePacketsParams(cmd)
 	if err != nil {
 		return err
 	}
-	p, err := filter.NewPacketsLimit(ps.ip, ps.limit)
+	p, err := filter.NewPacketsLimit(runtime.GOOS, ps.ip, ps.limit)
 	if err != nil {
 		return err
 	}
-	if err := p.Apply(); err != nil {
+	if err := p.Set(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func parseUnsetPacketsCmd(cmd *cobra.Command, args []string) error {
-	ps, err := validate(cmd)
+	ps, err := validatePacketsParams(cmd)
 	if err != nil {
 		return err
 	}
-	p, err := filter.NewPacketsLimit(ps.ip, ps.limit)
+	p, err := filter.NewPacketsLimit(runtime.GOOS, ps.ip, ps.limit)
 	if err != nil {
 		return err
 	}

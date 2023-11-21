@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"github.com/yuriykis/funny-filter/log"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +17,12 @@ func newRootCmd() *cobra.Command {
 	}
 	cmd.AddCommand(NewBandwidthCmd())
 	cmd.AddCommand(NewPacketsCmd())
+
+	// Hide the default cobra completion command
+	cCmd := NewCompletionCmd()
+	cCmd.Hidden = true
+	cmd.AddCommand(cCmd)
+
 	return cmd
 }
 
@@ -26,4 +32,12 @@ func Execute() error {
 		return err
 	}
 	return nil
+}
+
+func NewCompletionCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "completion",
+		Short: "Generate completion script",
+	}
+	return cmd
 }

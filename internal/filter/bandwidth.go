@@ -1,29 +1,46 @@
 package filter
 
 import (
-	"fmt"
-
+	"github.com/yuriykis/funny-filter/internal/filter/linux"
 	"github.com/yuriykis/funny-filter/log"
 )
 
-type BandwidthLimit struct {
+const (
+	BandwidthLimitTypeLinux = "linux"
+)
+
+type BandwidthLimit interface {
+	Set() error
+	Unset() error
+}
+
+func NewBandwidthLimit(osType string, dev string, ip string, limit string) (BandwidthLimit, error) {
+	switch osType {
+	case BandwidthLimitTypeLinux:
+		return NewBandwidthLimitLinux(dev, ip, limit)
+	default:
+		return nil, ErrWrongOS(osType)
+	}
+}
+
+type BandwidthLimitLinux struct {
 	Dev   string
 	IP    string
 	Limit string
 }
 
-func NewBandwidthLimit(dev string, ip string, limit string) (*BandwidthLimit, error) {
+func NewBandwidthLimitLinux(dev string, ip string, limit string) (*BandwidthLimitLinux, error) {
 	if err := validateBandwidthParams(dev, ip, limit); err != nil {
 		return nil, err
 	}
-	return &BandwidthLimit{
+	return &BandwidthLimitLinux{
 		Dev:   dev,
 		IP:    ip,
 		Limit: limit,
 	}, nil
 }
 
-func (b *BandwidthLimit) Apply() error {
+func (b *BandwidthLimitLinux) Set() error {
 
 	log.WithFields(log.Fields{
 		"dev":   b.Dev,
@@ -31,34 +48,38 @@ func (b *BandwidthLimit) Apply() error {
 		"limit": b.Limit,
 	}).Info("Applying bandwidth limit")
 
-	if err := checkIfbModule(); err != nil {
-		return err
-	}
-	if err := createIfb(); err != nil {
+	// TODO: handle errors, some errors can be ignored and treated as warnings
+	// we can handle specific error messages and decide if we should return error or not
+	// there is no error handling linux bash commands at the moment
+	if err := linux.CheckIfbModule(); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setUpIfb(); err != nil {
+	if err := linux.CreateIfb(); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setIngressQdisc(b.Dev); err != nil {
+	if err := linux.SetUpIfb(); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setIngressFilter(b.Dev); err != nil {
+	if err := linux.SetIngressQdisc(b.Dev); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setIfbQdisc(); err != nil {
+	if err := linux.SetIngressFilter(b.Dev); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setIfbClass(b.Limit, b.Limit); err != nil {
+	if err := linux.SetIfbQdisc(); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := setIfbFilter(b.IP); err != nil {
+	if err := linux.SetIfbClass(b.Limit, b.Limit); err != nil {
+		log.Error(err)
+		// return err
+	}
+	if err := linux.SetIfbFilter(b.IP); err != nil {
 		// return err
 		log.Error(err)
 	}
@@ -72,7 +93,7 @@ func (b *BandwidthLimit) Apply() error {
 	return nil
 }
 
-func (b *BandwidthLimit) Unset() error {
+func (b *BandwidthLimitLinux) Unset() error {
 
 	log.WithFields(log.Fields{
 		"dev":   b.Dev,
@@ -80,17 +101,21 @@ func (b *BandwidthLimit) Unset() error {
 		"limit": b.Limit,
 	}).Info("Unsetting bandwidth limit")
 
-	if err := unsetIngressQdisc(b.Dev); err != nil {
+	if err := linux.UnsetIngressQdisc(b.Dev); err != nil {
 		log.Error(err)
+		// return err
 	}
-	if err := tearDownIfb(); err != nil {
+	if err := linux.TearDownIfb(); err != nil {
 		log.Error(err)
+		// return err
 	}
-	if err := unsetIfbQdisc(); err != nil {
+	if err := linux.UnsetIfbQdisc(); err != nil {
 		log.Error(err)
+		// return err
 	}
-	if err := deleteIfb(); err != nil {
+	if err := linux.DeleteIfb(); err != nil {
 		log.Error(err)
+		// return err
 	}
 
 	log.WithFields(log.Fields{
@@ -104,7 +129,7 @@ func (b *BandwidthLimit) Unset() error {
 
 func validateBandwidthParams(dev string, ip string, limit string) error {
 	if dev == "" {
-		return fmt.Errorf("dev is empty")
+		return ErrInvalidDev("dev is empty", dev)
 	}
 	if err := validateBandwidthLimit(limit); err != nil {
 		return err
@@ -117,10 +142,10 @@ func validateBandwidthParams(dev string, ip string, limit string) error {
 
 func validateBandwidthLimit(limit string) error {
 	if len(limit) < 4 {
-		return fmt.Errorf("limit is too short")
+		return ErrInvalidBandwidthLimit("limit is too short", limit)
 	}
 	if limit[len(limit)-4:] != "kbps" && limit[len(limit)-4:] != "mbps" && limit[len(limit)-4:] != "gbps" {
-		return fmt.Errorf("limit must be in kbps, mbps or gbps")
+		return ErrInvalidBandwidthLimit("limit is not in kbps, mbps or gbps format", limit)
 	}
 	return nil
 }

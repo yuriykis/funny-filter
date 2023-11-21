@@ -1,14 +1,13 @@
-package filter
+package linux
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/yuriykis/funny-filter/log"
 )
 
-func run(command string) (string, error) {
+func Run(command string) (string, error) {
 
 	log.WithFields(log.Fields{
 		"command": command,
@@ -17,14 +16,14 @@ func run(command string) (string, error) {
 	cmd := exec.Command("bash", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + string(output))
+		log.Errorf("Command failed with error: %s: %s", err, string(output))
 	} else {
-		fmt.Println(string(output))
+		log.Debugf("Command output: %s", string(output))
 	}
 	return string(output), err
 }
 
-func build(params ...string) string {
+func Build(params ...string) string {
 
 	log.WithFields(log.Fields{
 		"params": params,

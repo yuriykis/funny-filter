@@ -41,7 +41,12 @@ At the moment, the tool is only tested on Fedora 38. It may not work on other Li
     ```sh
     make build
     ```
-3. Optionally, you can adjust the build parameters in the Makefile:
+3. Run the application binary
+    ```sh
+    ./bin/ff
+    ```
+4. Run the application with make
+    ##### Adjust the parameters in the Makefile before running the commands below:
     ```
     BINARY_NAME=ff
     GO=/path/to/go
@@ -50,7 +55,7 @@ At the moment, the tool is only tested on Fedora 38. It may not work on other Li
     P_LIMIT=10
     INTERFACE=enp0s5
     ```
-4. Run the application with make
+    ##### Available make commands:
     ```sh
     make run
     ```

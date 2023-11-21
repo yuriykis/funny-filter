@@ -98,6 +98,7 @@ func validatePacketsLimit(limit string) error {
 	}
 	return nil
 }
+
 func validateIP(ip string) error {
 	if ip == "" {
 		return ErrInvalidIP("IP is empty", ip)

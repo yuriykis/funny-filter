@@ -17,6 +17,8 @@ func main() {
 	}
 }
 
+// checkOS checks if OS is supported
+// we currently support only linux
 func checkOS() error {
 	if runtime.GOOS != "linux" {
 		return errors.New("OS is not supported")

@@ -4,9 +4,13 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
+const (
+	ifbName = "ifb0"
+)
+
 // we probably need to extend this to handle specific error messages as warnings
 func CheckIfbModule() error {
-	_, err := Run("sudo modprobe ifb")
+	_, err := Run("modprobe ifb")
 	return err
 }
 
@@ -16,7 +20,6 @@ func CreateIfb() error {
 	// 	return err
 	// }
 	// return nil
-	ifbName := "ifb0"
 	ifb := &netlink.Ifb{
 		LinkAttrs: netlink.LinkAttrs{
 			Name: ifbName,
@@ -29,16 +32,37 @@ func CreateIfb() error {
 }
 
 func SetUpIfb() error {
-	_, err := Run("sudo ip link set dev ifb0 up")
-	return err
+	// _, err := Run("sudo ip link set dev ifb0 up")
+	ifb, err := netlink.LinkByName(ifbName)
+	if err != nil {
+		return err
+	}
+	if err := netlink.LinkSetUp(ifb); err != nil {
+		return err
+	}
+	return nil
 }
 
 func TearDownIfb() error {
-	_, err := Run("sudo ip link set dev ifb0 down")
-	return err
+	// _, err := Run("sudo ip link set dev ifb0 down")
+	ifb, err := netlink.LinkByName(ifbName)
+	if err != nil {
+		return err
+	}
+	if err := netlink.LinkSetDown(ifb); err != nil {
+		return err
+	}
+	return nil
 }
 
 func DeleteIfb() error {
-	_, err := Run("sudo ip link delete ifb0 type ifb")
+	// _, err := Run("sudo ip link delete ifb0 type ifb")
+	ifb, err := netlink.LinkByName(ifbName)
+	if err != nil {
+		return err
+	}
+	if err := netlink.LinkDel(ifb); err != nil {
+		return err
+	}
 	return err
 }

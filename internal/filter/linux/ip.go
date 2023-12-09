@@ -14,7 +14,7 @@ func CheckIfbModule() error {
 	return err
 }
 
-func CreateIfb() error {
+func CreateIfb(netlinker Netlinker) error {
 	// _, err := Run("sudo ip link add name ifb0 type ifb")
 	// if err != nil && err.Error() != "exit status 2" {
 	// 	return err
@@ -25,44 +25,32 @@ func CreateIfb() error {
 			Name: ifbName,
 		},
 	}
-	if err := netlink.LinkAdd(ifb); err != nil {
-		return err
-	}
-	return nil
+	return netlinker.LinkAdd(ifb)
 }
 
-func SetUpIfb() error {
+func SetUpIfb(netlinker Netlinker) error {
 	// _, err := Run("sudo ip link set dev ifb0 up")
-	ifb, err := netlink.LinkByName(ifbName)
+	ifb, err := netlinker.LinkByName(ifbName)
 	if err != nil {
 		return err
 	}
-	if err := netlink.LinkSetUp(ifb); err != nil {
-		return err
-	}
-	return nil
+	return netlinker.LinkSetUp(ifb)
 }
 
-func TearDownIfb() error {
+func TearDownIfb(netlinker Netlinker) error {
 	// _, err := Run("sudo ip link set dev ifb0 down")
-	ifb, err := netlink.LinkByName(ifbName)
+	ifb, err := netlinker.LinkByName(ifbName)
 	if err != nil {
 		return err
 	}
-	if err := netlink.LinkSetDown(ifb); err != nil {
-		return err
-	}
-	return nil
+	return netlinker.LinkSetDown(ifb)
 }
 
-func DeleteIfb() error {
+func DeleteIfb(netlinker Netlinker) error {
 	// _, err := Run("sudo ip link delete ifb0 type ifb")
-	ifb, err := netlink.LinkByName(ifbName)
+	ifb, err := netlinker.LinkByName(ifbName)
 	if err != nil {
 		return err
 	}
-	if err := netlink.LinkDel(ifb); err != nil {
-		return err
-	}
-	return err
+	return netlinker.LinkDel(ifb)
 }

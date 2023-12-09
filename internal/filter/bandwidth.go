@@ -27,6 +27,8 @@ type BandwidthLimitLinux struct {
 	Dev   string
 	IP    string
 	Limit string
+
+	netlinker linux.Netlinker
 }
 
 func NewBandwidthLimitLinux(dev string, ip string, limit string) (*BandwidthLimitLinux, error) {
@@ -34,9 +36,10 @@ func NewBandwidthLimitLinux(dev string, ip string, limit string) (*BandwidthLimi
 		return nil, err
 	}
 	return &BandwidthLimitLinux{
-		Dev:   dev,
-		IP:    ip,
-		Limit: limit,
+		Dev:       dev,
+		IP:        ip,
+		Limit:     limit,
+		netlinker: &linux.RealNetlinker{},
 	}, nil
 }
 
@@ -55,11 +58,11 @@ func (b *BandwidthLimitLinux) Set() error {
 		log.Error(err)
 		// return err
 	}
-	if err := linux.CreateIfb(); err != nil {
+	if err := linux.CreateIfb(b.netlinker); err != nil {
 		log.Error(err)
 		// return err
 	}
-	if err := linux.SetUpIfb(); err != nil {
+	if err := linux.SetUpIfb(b.netlinker); err != nil {
 		log.Error(err)
 		// return err
 	}
@@ -105,7 +108,7 @@ func (b *BandwidthLimitLinux) Unset() error {
 		log.Error(err)
 		// return err
 	}
-	if err := linux.TearDownIfb(); err != nil {
+	if err := linux.TearDownIfb(b.netlinker); err != nil {
 		log.Error(err)
 		// return err
 	}
@@ -113,7 +116,7 @@ func (b *BandwidthLimitLinux) Unset() error {
 		log.Error(err)
 		// return err
 	}
-	if err := linux.DeleteIfb(); err != nil {
+	if err := linux.DeleteIfb(b.netlinker); err != nil {
 		log.Error(err)
 		// return err
 	}

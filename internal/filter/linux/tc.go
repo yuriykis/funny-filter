@@ -1,9 +1,26 @@
 package linux
 
+import "github.com/vishvananda/netlink"
+
 // we probably need to extend this to handle specific error messages as warnings
 func SetIngressQdisc(dev string) error {
-	_, err := Run(Build("sudo tc qdisc add dev", dev, "handle ffff: ingress"))
-	return err
+	// _, err := Run(Build("sudo tc qdisc add dev", dev, "handle ffff: ingress"))
+	// return err
+
+	link, err := netlink.LinkByName(dev)
+	if err != nil {
+		return err
+	}
+
+	qdisc := &netlink.Ingress{
+		QdiscAttrs: netlink.QdiscAttrs{
+			LinkIndex: link.Attrs().Index,
+			Handle:    netlink.MakeHandle(0xffff, 0),
+			Parent:    netlink.HANDLE_INGRESS,
+		},
+	}
+
+	return netlink.QdiscAdd(qdisc)
 }
 
 func SetIngressFilter(dev string) error {

@@ -51,40 +51,37 @@ func (b *BandwidthLimitLinux) Set() error {
 		"limit": b.Limit,
 	}).Info("Applying bandwidth limit")
 
-	// TODO: handle errors, some errors can be ignored and treated as warnings
-	// we can handle specific error messages and decide if we should return error or not
-	// there is no error handling linux bash commands at the moment
 	if err := linux.CheckIfbModule(); err != nil {
 		log.Error(err)
 		// return err
 	}
 	if err := linux.CreateIfb(b.netlinker); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetUpIfb(b.netlinker); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetIngressQdisc(b.Dev); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetIngressFilter(b.Dev); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetIfbQdisc(); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetIfbClass(b.Limit, b.Limit); err != nil {
 		log.Error(err)
-		// return err
+		return err
 	}
 	if err := linux.SetIfbFilter(b.IP); err != nil {
-		// return err
 		log.Error(err)
+		return err
 	}
 
 	log.WithFields(log.Fields{
